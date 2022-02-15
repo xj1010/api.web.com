@@ -3,6 +3,7 @@ package service
 import (
 	"admin/models"
 	"admin/utils"
+	"context"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/siddontang/go/log"
@@ -14,9 +15,15 @@ type BaiDuService struct {
 	BaseService
 }
 
-func (s *BaiDuService) Execute() *BaiDuService {
-	s.Desc = "百度热度"
-	s.Run(s.Work)
+
+func NewBaiDuService(BaseCxt context.Context) *BaiDuService {
+	s := &BaiDuService{}
+	s.IsRunning = false
+	s.Desc = "百度"
+	s.ServiceID = "BaiDu"
+	s.Task = s.Work
+	s.baseCxt = BaseCxt
+	s.SetContext()
 	return s
 }
 
@@ -64,9 +71,7 @@ func(s *BaiDuService) Work() {
 	})
 
 	log.Infof(s.Desc + "采集成功,更新%d, 新增%d", updateTotal, addTotal)
+
 }
-
-
-
 
 

@@ -3,6 +3,7 @@ package service
 import (
 	"admin/models"
 	"admin/utils"
+	"context"
 	"github.com/siddontang/go/log"
 	"regexp"
 	"strconv"
@@ -13,9 +14,14 @@ type ZhiHuService struct {
 	BaseService
 }
 
-func (s *ZhiHuService) Execute() *ZhiHuService {
-	s.Desc = "知乎热榜"
-	s.Run(s.Work)
+func NewZhiHuService(BaseCxt context.Context) *ZhiHuService {
+	s := &ZhiHuService{}
+	s.IsRunning = false
+	s.Desc = "知乎"
+	s.ServiceID = "ZhiHu"
+	s.Task = s.Work
+	s.baseCxt = BaseCxt
+	s.SetContext()
 	return s
 }
 

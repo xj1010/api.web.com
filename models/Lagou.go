@@ -25,7 +25,7 @@ type Lagou struct {
 	SalaryMonth  int     `gorm:"column:salary_month" json:"salary_month"`
 	WorkYear     string    `gorm:"column:work_year" json:"work_year"`
 	Education    string    `gorm:"column:education" json:"education"`
-	Createtime   JsonTime `gorm:"column:create_time" json:"create_time"`
+	Createtime   time.Time `gorm:"column:create_time" json:"create_time"`
 }
 
 type JsonTime time.Time
@@ -120,5 +120,6 @@ func (lagou *Lagou) GetList(searchMap map[string]string, page, limit int) (count
 	if err := dbCon.Find(&LagouList).Error; err != nil {
 		return 0, LagouList
 	}
+
 	return count, LagouList
 }

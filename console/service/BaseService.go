@@ -1,72 +1,74 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"github.com/siddontang/go/log"
 	"math/rand"
-	"os"
 	"time"
 )
 
 type BaseService struct {
 	IsRunning   bool
 	Desc string
+	ServiceID string
+	CancelFunc  context.CancelFunc
+	Cxt context.Context
+	baseCxt context.Context
+	Task func()
+}
+
+func(b *BaseService) SetContext() {
+	cxt, cancelFunc := context.WithCancel(b.baseCxt)
+	b.Cxt = cxt
+	b.CancelFunc = cancelFunc
 }
 
 func (b *BaseService)  Start() {
+	 if b.IsRunning {
+	 	return
+	 }
+
 	 b.IsRunning = true
+	 b.Run()
 }
 
 func (b *BaseService)  Stop() {
 	b.IsRunning = false
+	b.CancelFunc()
+
 }
 
-func (b *BaseService)  GetRunningStatus() bool {
-	return b.IsRunning
-}
-
-
-func (b *BaseService)  Run(f func()) {
+func (b *BaseService)  Run()  {
 	go func() {
 		defer func() {
 			if err := recover(); err !=nil {
 				log.Info(err)
 			}
 		}()
+
 		for {
-			if b.IsRunning {
-				f()
+			select {
+				case <-b.Cxt.Done():
+					//重置context
+					b.SetContext()
+					fmt.Println(b.ServiceID +"结束了")
+					return
+				default:
+					b.Task()
 			}
 
 			rand.Seed(time.Now().UnixNano())
-			sleepNum := rand.Intn(120)
+			sleepNum := rand.Intn(10)
 			timer1 := time.NewTimer(time.Duration(sleepNum) * time.Second)
 			<- timer1.C
 			timer1.Stop()
+
 		}
 
-
 	}()
+
 }
 
-func (b *BaseService) DirExist(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	// 判断报错是否是因为文件不存在引起的
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
-// 新建文件夹，必要时创建文件的父级目录
-func (b *BaseService) MkDir(path string) error {
-	err := os.MkdirAll(path, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 

@@ -93,7 +93,7 @@ func (adminNode *AdminNode) GetUserNodeAuthList(uid int) []AdminNode {
 	dbCon := db.GetInstance().GetMysqlDb()
 
 	if uid == 1 {
-		sql = "select id,pid,name,level,path,icon,permission_name from  admin_node where status=1 "
+		sql = "select id,pid,name,level,path,icon,permission_name from  admin_node where status"
 		dbCon.Raw(sql).Scan(&nodeInfoList)
 	} else {
 		sql = "select admin_node.id,pid, admin_node.name,level,path, icon,permission_name" +

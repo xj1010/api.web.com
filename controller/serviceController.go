@@ -43,32 +43,33 @@ func (scl *ServiceController) update(c *gin.Context) {
 }
 
 func (scl *ServiceController) list(c *gin.Context) {
-	structMap := console.List()
+	serviceMap := console.GetServiceMap()
+	fmt.Println(serviceMap)
 	title := c.Query("title")
 	status := c.Query("status")
 	isStart, _ := strconv.ParseBool(status)
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", strconv.Itoa(setting.PageSize)))
-	serviceList := make([]map[string]interface{}, 0, len(structMap))
+	serviceList := make([]map[string]interface{}, 0, len(serviceMap))
 
 	var serviceNames []string
-	for key, _ := range structMap {
+	for key, _ := range serviceMap {
 		serviceNames = append(serviceNames, key)
 	}
 
 	sort.Strings(serviceNames)
 	for _, serviceName := range serviceNames {
-		s := structMap[serviceName]
+		s := serviceMap[serviceName]
 		if title != ""  && serviceName != title {
 			continue
 		}
-		if status != "" && isStart != s.GetRunningStatus(){
+		if status != "" && isStart != s.IsRunning{
 			continue
 		}
 
 		serviceMap := make(map[string]interface{})
 		serviceMap["name"] = serviceName
-		serviceMap["status"] = s.GetRunningStatus()
+		serviceMap["status"] = s.IsRunning
 		serviceMap["desc"] = s.Desc
 		serviceList = append(serviceList, serviceMap)
 	}
@@ -96,7 +97,7 @@ func (scl *ServiceController) list(c *gin.Context) {
 
 func (scl *ServiceController) start(c *gin.Context) {
 	serviceName := c.Query("s")
-	serviceMap := console.StructMap
+	serviceMap := console.GetServiceMap()
 	if s, ok := serviceMap[serviceName]; ok {
 		s.Start()
 		scl.SuccessResponse(c, "操作成功",  nil)
@@ -106,14 +107,14 @@ func (scl *ServiceController) start(c *gin.Context) {
 }
 
 func (scl *ServiceController) allStart(c *gin.Context) {
-	for _ , s := range console.StructMap {
+	for _ , s := range console.GetServiceMap() {
 		s.Start()
 	}
 	scl.SuccessResponse(c, "操作成功",  nil)
 }
 
 func (scl *ServiceController) allStop(c *gin.Context) {
-	for _ , s := range console.StructMap {
+	for _ , s := range console.GetServiceMap() {
 		s.Stop()
 	}
 	scl.SuccessResponse(c, "操作成功",  nil)
@@ -121,7 +122,7 @@ func (scl *ServiceController) allStop(c *gin.Context) {
 
 func (scl *ServiceController) stop(c *gin.Context) {
 	serviceName := c.Query("s")
-	serviceMap := console.StructMap
+	serviceMap := console.GetServiceMap()
 
 	if s, ok := serviceMap[serviceName]; ok {
 		s.Stop()
@@ -131,10 +132,9 @@ func (scl *ServiceController) stop(c *gin.Context) {
 	scl.ErrorResponse(c, "参数非法",  nil)
 }
 
-
 func (scl *ServiceController) restart(c *gin.Context) {
 	serviceName := c.Query("s")
-	serviceMap := console.StructMap
+	serviceMap := console.GetServiceMap()
 
 	if s, ok := serviceMap[serviceName]; ok {
 		s.Stop()

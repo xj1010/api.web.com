@@ -2,15 +2,20 @@ package service
 
 import (
 	"admin/db"
+	"context"
 	"testing"
+	"time"
 )
 
-func Test_findByPk(t *testing.T) {
+func Test_lagou(t *testing.T) {
 	db.GetInstance().InitMysqlPool()
 	db.GetInstance().GetMysqlDb().LogMode(true)
-	lagou :=  LaGouService{}
-	lagou.IsRunning = true
+	BaseContext, _ := context.WithCancel(context.Background())
 
-	lagou.Work()
+	service := NewLaGouService(BaseContext)
+	service.Start()
+	for {
+		time.Sleep(1000)
+	}
 
 }

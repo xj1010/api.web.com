@@ -2,15 +2,20 @@ package service
 
 import (
 	"admin/db"
+	"context"
 	"testing"
+	"time"
 )
 
 func Test_baidu(t *testing.T) {
 	db.GetInstance().InitMysqlPool()
 	db.GetInstance().GetMysqlDb().LogMode(true)
-	lagou :=  BaiDuService{}
-	lagou.IsRunning = true
+	BaseContext, _ := context.WithCancel(context.Background())
 
-	lagou.Work()
+	service := NewBaiDuService(BaseContext)
+	service.Start()
+	for {
+		time.Sleep(1000)
+	}
 
 }

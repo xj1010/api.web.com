@@ -3,6 +3,7 @@ package service
 import (
 	"admin/models"
 	"admin/utils"
+	"context"
 	"fmt"
 	"github.com/siddontang/go/log"
 	"net/url"
@@ -15,10 +16,14 @@ type WeiBoService struct {
 	BaseService
 }
 
-func (s *WeiBoService) Execute() *WeiBoService {
-	s.Run(s.Work)
-	s.Desc = "新浪微博热度"
-
+func NewWeiBoService(BaseCxt context.Context) *WeiBoService {
+	s := &WeiBoService{}
+	s.IsRunning = false
+	s.Desc = "微博"
+	s.ServiceID = "WeiBo"
+	s.Task = s.Work
+	s.baseCxt = BaseCxt
+	s.SetContext()
 	return s
 }
 

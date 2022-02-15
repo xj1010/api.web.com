@@ -4,6 +4,7 @@ import (
 	"admin/models"
 	_ "admin/models"
 	"admin/utils"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -24,9 +25,14 @@ type LaGouService struct {
 	BaseService
 }
 
-func (s *LaGouService) Execute() *LaGouService {
+func NewLaGouService(BaseCxt context.Context) *LaGouService {
+	s := &LaGouService{}
+	s.IsRunning = false
 	s.Desc = "拉勾网"
-	s.Run(s.Work)
+	s.ServiceID = "LaGou"
+	s.Task = s.Work
+	s.baseCxt = BaseCxt
+	s.SetContext()
 	return s
 }
 
@@ -220,7 +226,7 @@ func(s *LaGouService) getSubjectDataByName(subjectName string, page int, ) (addT
 			lagouObj.WorkYear = v.Workyear
 			lagouObj.Education = v.Education
 			createTime, _ := time.ParseInLocation("2006-01-02 15:04:05", v.Createtime, time.Local)
-			lagouObj.Createtime = models.JsonTime(createTime)
+			lagouObj.Createtime = createTime
 
 			updateNum , addNum := lagouObj.AddOrUpdateRecord(lagouObj)
 			if updateNum > 0 {
