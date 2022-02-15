@@ -2,35 +2,26 @@ package console
 
 import (
 	"admin/console/service"
-	"sort"
+	"context"
 	"unsafe"
 )
 
-var StructMap map[string]*service.BaseService
-
 func Start() {
-	initStructMap()
+	initServiceMap()
  }
 
-func initStructMap() {
-	StructMap = make(map[string]*service.BaseService)
-	StructMap["WeiBoService"] = (*service.BaseService)(unsafe.Pointer(new(service.WeiBoService).Execute()))
-	StructMap["BaiDuService"] = (*service.BaseService)(unsafe.Pointer(new(service.BaiDuService).Execute()))
-	StructMap["ZhiHuService"] = (*service.BaseService)(unsafe.Pointer(new(service.ZhiHuService).Execute()))
-	StructMap["LaGouService"] = (*service.BaseService)(unsafe.Pointer(new(service.LaGouService).Execute()))
+var baseContext context.Context
+var serviceMap  map[string]*service.BaseService
+
+func initServiceMap() {
+	baseContext, _ = context.WithCancel(context.Background())
+	serviceMap  = make(map[string]*service.BaseService)
+	serviceMap["BaiDu"] = (*service.BaseService)(unsafe.Pointer(service.NewBaiDuService(baseContext)))
+	serviceMap["WeiBo"] = (*service.BaseService)(unsafe.Pointer(service.NewWeiBoService(baseContext)))
+	serviceMap["ZhiHu"] = (*service.BaseService)(unsafe.Pointer(service.NewZhiHuService(baseContext)))
+	serviceMap["LaGou"] = (*service.BaseService)(unsafe.Pointer(service.NewLaGouService(baseContext)))
 }
 
-func List() map[string]*service.BaseService {
-	sortMap := make(map[string]*service.BaseService)
-	var strs []string
-	for key, _ := range StructMap {
-		strs = append(strs, key)
-	}
-
-	sort.Strings(strs)
-	for _, k := range strs {
-		sortMap[k] = StructMap[k]
-	}
-
-	return StructMap
+func GetServiceMap() map[string]*service.BaseService {
+	return serviceMap
 }
