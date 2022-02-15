@@ -1,5 +1,5 @@
-package interfance
+package interfaces
 
 type InitService interface {
-	Run(func())
+	Run()
 }
